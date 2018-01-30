@@ -58,7 +58,7 @@ var GetTableList = function GetTableList(connection) {
 var GetFieldsFromTable = function GetFieldsFromTable(connection, table) {
     var fields = [];
     return new Promise(function (resolve, reject) {
-        connection.query('desc ' + table, function (err, rows) {
+        connection.query('desc `' + table + '`', function (err, rows) {
             if (err) {
                 reject(err);
             }

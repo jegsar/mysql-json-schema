@@ -52,7 +52,7 @@ const GetFieldsFromTable = (connection, table) => {
     const fields = [];
     return (
         new Promise(function (resolve, reject) {
-            connection.query(`desc ${table}`, function (err, rows) {
+            connection.query(`desc \`${table}\``, function (err, rows) {
                 if (err) {
                     reject(err);
                 }
