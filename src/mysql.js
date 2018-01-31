@@ -155,7 +155,7 @@ const GetRelationsFromTable = (connection, table) => {
                 }
                 relationsResp.forEach((value, index, array) => {
                     const { db, t1, t1Field, db2, t2, t2Field } = value; // Extract info
-                    relations.push({ localField: t1Field, foreignTable: t2, foreignField: t2Field });
+                    relations.push({ localField: t1Field, foreignSchema: db2, foreignTable: t2, foreignField: t2Field });
                 });
                 resolve(relations);
             });
@@ -186,7 +186,7 @@ const GetRelationsToTable = (connection, table) => {
                 }
                 relationsResp.forEach((value, index, array) => {
                     const { db, t1, t1Field, db2, t2, t2Field } = value; // Extract info
-                    relations.push({ localField: t2Field, foreignTable: t1, foreignField: t1Field });
+                    relations.push({ localField: t2Field, foreignSchema:db, foreignTable: t1, foreignField: t1Field });
                 });
                 resolve(relations);
             });
