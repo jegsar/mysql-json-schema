@@ -182,7 +182,7 @@ var AddRelationsByFieldNameToSchema = function AddRelationsByFieldNameToSchema(s
 var GetTableIndexes = function GetTableIndexes(connection, table) {
     var sqlIndexes = ' SELECT table_name AS `Table`,\n       index_name AS `Index`,\n       GROUP_CONCAT(column_name ORDER BY seq_in_index) AS `Columns`\n       FROM information_schema.statistics\n       WHERE table_schema = \'' + connection.config.database + '\' and (TABLE_NAME = \'' + table + '\')\n       GROUP BY 1,2;';
 
-    var relations = [];
+    var indexes = [];
     return new Promise(function (resolve, reject) {
         connection.query(sqlIndexes, function (err, indexesResp) {
             if (err) {
@@ -195,7 +195,7 @@ var GetTableIndexes = function GetTableIndexes(connection, table) {
 
                 indexes.push({ Index: Index, Columns: Columns });
             });
-            resolve(relations);
+            resolve(indexes);
         });
     });
 };

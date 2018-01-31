@@ -163,7 +163,7 @@ const GetTableIndexes = (connection, table) => {
        WHERE table_schema = '${connection.config.database}' and (TABLE_NAME = '${table}')
        GROUP BY 1,2;`;
 
-    const relations = [];
+    const indexes = [];
     return (
         new Promise(function (resolve, reject) {
             connection.query(sqlIndexes, function (err, indexesResp) {
@@ -174,7 +174,7 @@ const GetTableIndexes = (connection, table) => {
                     const {Table, Index, Columns} = value; // Extract info
                     indexes.push({Index: Index, Columns: Columns});
                 });
-                resolve(relations);
+                resolve(indexes);
             });
         })
     );
