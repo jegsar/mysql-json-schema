@@ -138,6 +138,27 @@ var AddRelationsToSchema = function AddRelationsToSchema(connection, schema) {
     });
 };
 
+var AddIndexesToSchema = function AddIndexesToSchema(connection, schema) {
+    return new Promise(function (resolve, reject) {
+
+        var promises = [];
+        var tableNames = Object.keys(schema.tables);
+        tableNames.forEach(function (tableName, index, array) {
+            promises.push(GetTableIndexes(connection, tableName).then(function (indexes) {
+                if (!schema.tables[tableName]) {
+                    schema.tables[tableName] = { fields: [], relationsFromTable: [], relationsToTable: [] };
+                }
+                schema.tables[tableName].indexes = indexes;
+            }));
+        });
+        Promise.all(promises).then(function () {
+            return resolve(schema);
+        }).catch(function (err) {
+            return reject(err);
+        });
+    });
+};
+
 var AddRelationsByFieldNameToSchema = function AddRelationsByFieldNameToSchema(schema) {
     var aliases = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     var ignoreDefaultNames = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : false;
@@ -156,6 +177,27 @@ var AddRelationsByFieldNameToSchema = function AddRelationsByFieldNameToSchema(s
         GetRelationsToTableByFieldNames(tableName, schema, aliasesToThisTable, ignoreDefaultNames, prefix, sufix);
     });
     return schema;
+};
+
+var GetTableIndexes = function GetTableIndexes(connection, table) {
+    var sqlIndexes = ' SELECT table_name AS `Table`,\n       index_name AS `Index`,\n       GROUP_CONCAT(column_name ORDER BY seq_in_index) AS `Columns`\n       FROM information_schema.statistics\n       WHERE table_schema = \'' + connection.config.database + '\' and (TABLE_NAME = \'' + table + '\')\n       GROUP BY 1,2;';
+
+    var relations = [];
+    return new Promise(function (resolve, reject) {
+        connection.query(sqlIndexes, function (err, indexesResp) {
+            if (err) {
+                reject(err);
+            }
+            indexesResp.forEach(function (value, index, array) {
+                var Table = value.Table,
+                    Index = value.Index,
+                    Columns = value.Columns; // Extract info
+
+                indexes.push({ Index: Index, Columns: Columns });
+            });
+            resolve(relations);
+        });
+    });
 };
 
 var GetRelationsFromTable = function GetRelationsFromTable(connection, table) {
@@ -217,6 +259,8 @@ var CreateFileWithContent = function CreateFileWithContent(fileName, content, ou
 var GetSchemaWithRelations = function GetSchemaWithRelations(connection) {
     return GetSchema(connection).then(function (res) {
         return AddRelationsToSchema(connection, res);
+    }).then(function (res) {
+        return AddIndexesToSchema(connection, res);
     }).catch(function (err) {
         console.error(err);
         throw err;

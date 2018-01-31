@@ -121,6 +121,29 @@ const AddRelationsToSchema = (connection, schema) => {
     );
 };
 
+const AddIndexesToSchema = (connection, schema) => {
+    return (
+        new Promise(function (resolve, reject) {
+
+            var promises = [];
+            const tableNames = Object.keys(schema.tables);
+            tableNames.forEach((tableName, index, array) => {
+                promises.push(
+                    GetTableIndexes(connection, tableName)
+                        .then((indexes) => {
+                            if (!schema.tables[tableName]) {
+                                schema.tables[tableName] = { fields: [], relationsFromTable: [], relationsToTable: [] };
+                            }
+                            schema.tables[tableName].indexes = indexes;
+                        })
+                );
+            });
+            Promise.all(promises).then(() => resolve(schema))
+                .catch((err) => reject(err));
+        })
+    );
+};
+
 const AddRelationsByFieldNameToSchema = (schema, aliases = [], ignoreDefaultNames = false, prefix = 'id_', sufix = '_id') => {
     const tableNames = Object.keys(schema.tables);
     tableNames.forEach((tableName, index, array) => {
@@ -130,6 +153,31 @@ const AddRelationsByFieldNameToSchema = (schema, aliases = [], ignoreDefaultName
         GetRelationsToTableByFieldNames(tableName, schema, aliasesToThisTable, ignoreDefaultNames, prefix, sufix);
     });
     return schema;
+};
+
+const GetTableIndexes = (connection, table) => {
+    const sqlIndexes = ` SELECT table_name AS \`Table\`,
+       index_name AS \`Index\`,
+       GROUP_CONCAT(column_name ORDER BY seq_in_index) AS \`Columns\`
+       FROM information_schema.statistics
+       WHERE table_schema = '${connection.config.database}' and (TABLE_NAME = '${table}')
+       GROUP BY 1,2;`;
+
+    const relations = [];
+    return (
+        new Promise(function (resolve, reject) {
+            connection.query(sqlIndexes, function (err, indexesResp) {
+                if (err) {
+                    reject(err);
+                }
+                indexesResp.forEach((value, index, array) => {
+                    const {Table, Index, Columns} = value; // Extract info
+                    indexes.push({Index: Index, Columns: Columns});
+                });
+                resolve(relations);
+            });
+        })
+    );
 };
 
 const GetRelationsFromTable = (connection, table) => {
@@ -205,6 +253,7 @@ const CreateFileWithContent = (fileName, content, outputFolder) => {
 const GetSchemaWithRelations = (connection) => {
     return GetSchema(connection)
         .then(res => AddRelationsToSchema(connection, res))
+        .then(res => AddIndexesToSchema(connection, res))
         .catch((err) => {
             console.error(err);
             throw err;
