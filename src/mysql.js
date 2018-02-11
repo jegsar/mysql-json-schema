@@ -158,7 +158,8 @@ const AddRelationsByFieldNameToSchema = (schema, aliases = [], ignoreDefaultName
 const GetTableIndexes = (connection, table) => {
     const sqlIndexes = ` SELECT table_name AS \`Table\`,
        index_name AS \`Index\`,
-       GROUP_CONCAT(column_name ORDER BY seq_in_index) AS \`Columns\`
+       GROUP_CONCAT(column_name ORDER BY seq_in_index) AS \`Columns\`,
+       SUM(NON_UNIQUE) = 0 AS \`Unique\`
        FROM information_schema.statistics
        WHERE table_schema = '${connection.config.database}' and (TABLE_NAME = '${table}')
        GROUP BY 1,2;`;
