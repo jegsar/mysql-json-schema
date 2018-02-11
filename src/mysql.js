@@ -172,8 +172,8 @@ const GetTableIndexes = (connection, table) => {
                     reject(err);
                 }
                 indexesResp.forEach((value, index, array) => {
-                    const {Table, Index, Columns} = value; // Extract info
-                    indexes.push({Index: Index, Columns: Columns});
+                    const {Table, Index, Columns, Unique} = value; // Extract info
+                    indexes.push({Index: Index, Columns: Columns, Unique: Unique});
                 });
                 resolve(indexes);
             });

@@ -191,9 +191,10 @@ var GetTableIndexes = function GetTableIndexes(connection, table) {
             indexesResp.forEach(function (value, index, array) {
                 var Table = value.Table,
                     Index = value.Index,
-                    Columns = value.Columns; // Extract info
+                    Columns = value.Columns,
+                    Unique = value.Unique; // Extract info
 
-                indexes.push({ Index: Index, Columns: Columns });
+                indexes.push({ Index: Index, Columns: Columns, Unique: Unique });
             });
             resolve(indexes);
         });
