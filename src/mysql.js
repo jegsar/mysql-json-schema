@@ -67,8 +67,8 @@ const GetFieldsFromTable = (connection, table) => {
 }
 
 const CreateConnection = (args = {}) => {
-    const { user, password, host, database, multipleStatements = true } = args;
-    const connection = mysql.createConnection({ user, password, host, database, multipleStatements });
+    const { user, password, host, database, port =  3306, multipleStatements = true } = args;
+    const connection = mysql.createConnection({ user, password, host, database, port, multipleStatements });
     return connection;
 }
 

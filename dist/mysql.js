@@ -83,10 +83,12 @@ var CreateConnection = function CreateConnection() {
         password = args.password,
         host = args.host,
         database = args.database,
+        _args$port = args.port,
+        port = _args$port === undefined ? 3306 : _args$port,
         _args$multipleStateme = args.multipleStatements,
         multipleStatements = _args$multipleStateme === undefined ? true : _args$multipleStateme;
 
-    var connection = _mysql2.default.createConnection({ user: user, password: password, host: host, database: database, multipleStatements: multipleStatements });
+    var connection = _mysql2.default.createConnection({ user: user, password: password, host: host, database: database, port: port, multipleStatements: multipleStatements });
     return connection;
 };
 
